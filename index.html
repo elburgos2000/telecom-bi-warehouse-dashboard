@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Telecom BI Analytics | Executive Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f17;
+            color: #f1f5f9;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .glass-panel {
+            background: rgba(18, 24, 38, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+        }
+        .glow-hover:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <!-- Top Navigation Bar -->
+    <header class="glass-panel p-5 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-blue-500/20">
+                📊
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-xl md:text-2xl font-bold text-white tracking-tight">Enterprise Telecom BI Analytics</h1>
+                    <span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Live Warehouse</span>
+                </div>
+                <p class="text-xs md:text-sm text-slate-400">Modelo Dimensional Star Schema | Diseñado por <strong class="text-slate-200">Brayan Burgos Palomino</strong> (BI Analyst)</p>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <div>
+                <label class="text-xs text-slate-400 block mb-1">Canal de Contacto</label>
+                <select id="channelFilter" onchange="loadAllData()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="ALL">Todos los Canales</option>
+                    <option value="CHN-VOICE">Voz Inbound (Call Center)</option>
+                    <option value="CHN-CHAT">Digital Web Chat</option>
+                    <option value="CHN-WAPP">WhatsApp Official</option>
+                    <option value="CHN-ESCAL">Escalations Desk</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-xs text-slate-400 block mb-1">Segmento Cliente</label>
+                <select id="segmentFilter" onchange="loadAllData()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="ALL">Todos los Segmentos</option>
+                    <option value="SEG-VIP">VIP Platinum Corporate</option>
+                    <option value="SEG-FIBRA">Fibra Óptica 1Gbps</option>
+                    <option value="SEG-POST">Postpago 5G</option>
+                    <option value="SEG-PRE">Prepago</option>
+                </select>
+            </div>
+
+            <button onclick="loadAllData()" class="mt-4 md:mt-5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition-all shadow-md shadow-blue-600/30">
+                🔄 Refrescar
+            </button>
+        </div>
+    </header>
+
+    <!-- Main KPIs Grid -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <!-- KPI 1 -->
+        <div class="glass-panel p-5 glow-hover transition-all">
+            <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Total Interacciones</span>
+            <div class="flex items-baseline justify-between mt-2">
+                <span id="kpiVolume" class="text-2xl md:text-3xl font-extrabold text-white mono">--</span>
+                <span class="text-xs text-emerald-400 font-medium">100% Auditado</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">Muestreo en tiempo real</p>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="glass-panel p-5 glow-hover transition-all">
+            <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Satisfacción (CSAT)</span>
+            <div class="flex items-baseline justify-between mt-2">
+                <span id="kpiCSAT" class="text-2xl md:text-3xl font-extrabold text-amber-400 mono">--</span>
+                <span class="text-xs text-slate-400">Meta: 4.50</span>
+            </div>
+            <p class="text-xs text-emerald-400 mt-2">⭐ Calificación promedio</p>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="glass-panel p-5 glow-hover transition-all">
+            <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Resolución 1er Contacto (FCR)</span>
+            <div class="flex items-baseline justify-between mt-2">
+                <span id="kpiFCR" class="text-2xl md:text-3xl font-extrabold text-blue-400 mono">--</span>
+                <span class="text-xs text-emerald-400">Meta: 85.0%</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">Sin reaperturas en 72h</p>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="glass-panel p-5 glow-hover transition-all">
+            <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Tiempo de Gestión (AHT)</span>
+            <div class="flex items-baseline justify-between mt-2">
+                <span id="kpiAHT" class="text-2xl md:text-3xl font-extrabold text-indigo-400 mono">--</span>
+                <span class="text-xs text-slate-400">Segundos</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">En línea con SLA</p>
+        </div>
+
+        <!-- KPI 5 -->
+        <div class="glass-panel p-5 glow-hover transition-all">
+            <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Valor Protegido (Churn)</span>
+            <div class="flex items-baseline justify-between mt-2">
+                <span id="kpiRevenue" class="text-xl md:text-2xl font-extrabold text-emerald-400 mono">--</span>
+                <span class="text-xs text-emerald-400">USD</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">Ingreso anual retenido</p>
+        </div>
+    </section>
+
+    <!-- Visual Analytics Charts -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Chart 1: Curva de Afluencia Horaria -->
+        <div class="glass-panel p-5 lg:col-span-2">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-sm md:text-base font-bold text-white flex items-center gap-2">
+                    <span>📈</span> Curva de Afluencia y Volumen por Hora del Día
+                </h2>
+                <span class="text-xs text-slate-400">Distribución Horaria (8:00 - 20:00)</span>
+            </div>
+            <div class="h-64">
+                <canvas id="hourlyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: Distribución por Canal -->
+        <div class="glass-panel p-5">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-sm md:text-base font-bold text-white flex items-center gap-2">
+                    <span>📱</span> Volumen por Canal
+                </h2>
+                <span class="text-xs text-slate-400">Mix Operacional</span>
+            </div>
+            <div class="h-64">
+                <canvas id="channelChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Incident Categories vs Churn Risk -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="glass-panel p-5 lg:col-span-1">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-sm md:text-base font-bold text-white flex items-center gap-2">
+                    <span>⚠️</span> Riesgo de Churn por Incidencia
+                </h2>
+                <span class="text-xs text-rose-400 font-semibold">% Predictivo</span>
+            </div>
+            <div class="h-64">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Agent Performance Scorecard -->
+        <div class="glass-panel p-5 lg:col-span-2 flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-sm md:text-base font-bold text-white flex items-center gap-2">
+                        <span>🏆</span> Scorecard de Desempeño de Agentes
+                    </h2>
+                    <span class="text-xs text-slate-400">Top Performers & Coaching</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="pb-3 font-semibold">Agente</th>
+                                <th class="pb-3 font-semibold">Nivel / Rol</th>
+                                <th class="pb-3 font-semibold">Sede</th>
+                                <th class="pb-3 font-semibold text-right">Interacciones</th>
+                                <th class="pb-3 font-semibold text-right">AHT (s)</th>
+                                <th class="pb-3 font-semibold text-right">FCR %</th>
+                                <th class="pb-3 font-semibold text-right">CSAT</th>
+                                <th class="pb-3 font-semibold text-center">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agentTableBody" class="divide-y divide-slate-800/60">
+                            <!-- Inyectado vía JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive SQL Query Console -->
+    <section class="glass-panel p-6 mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+            <div>
+                <h2 class="text-base md:text-lg font-bold text-white flex items-center gap-2">
+                    <span>⚡</span> Consola Interactiva de Consultas SQL (In-Browser Query Explorer)
+                </h2>
+                <p class="text-xs text-slate-400">Ejecuta consultas analíticas en vivo contra el Data Warehouse (T-SQL / SQLite compatible).</p>
+            </div>
+
+            <!-- Preset Queries -->
+            <div class="flex flex-wrap gap-2">
+                <button onclick="setQuery(1)" class="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-blue-400 rounded border border-slate-700 transition-all">
+                    📌 Top Incidencias Churn
+                </button>
+                <button onclick="setQuery(2)" class="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded border border-slate-700 transition-all">
+                    📌 Ranking Agentes
+                </button>
+                <button onclick="setQuery(3)" class="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-purple-400 rounded border border-slate-700 transition-all">
+                    📌 ROI Canales
+                </button>
+            </div>
+        </div>
+
+        <div class="relative mb-4">
+            <textarea id="sqlInput" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs md:text-sm text-emerald-400 mono outline-none focus:border-blue-500 shadow-inner resize-y">SELECT cat.Category_Name, COUNT(*) AS Total, ROUND(AVG(f.Churn_Risk_Prob)*100, 1) AS Churn_Risk_Pct, ROUND(AVG(f.CSAT_Score), 2) AS Avg_CSAT FROM Fact_Interactions f JOIN Dim_Incident_Categories cat ON f.Category_Key = cat.Category_Key GROUP BY cat.Category_Name ORDER BY Churn_Risk_Pct DESC;</textarea>
+            <button onclick="runQuery()" class="absolute right-3 bottom-3 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-md shadow-md transition-all">
+                ▶️ Ejecutar Query
+            </button>
+        </div>
+
+        <!-- Query Results Container -->
+        <div id="queryResultContainer" class="hidden overflow-x-auto max-h-64 border border-slate-800 rounded-lg bg-slate-950/60 p-3">
+            <div id="queryStatus" class="text-xs text-slate-400 mb-2"></div>
+            <table class="w-full text-left text-xs mono">
+                <thead id="queryThead" class="text-slate-400 border-b border-slate-800"></thead>
+                <tbody id="queryTbody" class="divide-y divide-slate-800/40 text-slate-300"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-500 py-4">
+        Enterprise Telecom BI Analytics Platform • Brayan Burgos Palomino • Desarrollado con Star Schema, DuckDB, SQLite & Python
+    </footer>
+
+    <!-- Script de Datos y Charts -->
+    <script>
+        let hourlyChart = null;
+        let channelChart = null;
+        let categoryChart = null;
+
+        async function loadAllData() {
+            const channel = document.getElementById('channelFilter').value;
+            const segment = document.getElementById('segmentFilter').value;
+
+            // 1. Cargar KPIs
+            try {
+                const res = await fetch(`/api/kpis?channel=${channel}&segment=${segment}`);
+                const data = await res.json();
+                document.getElementById('kpiVolume').textContent = Number(data.total_interactions).toLocaleString();
+                document.getElementById('kpiCSAT').textContent = `${data.avg_csat} / 5.0`;
+                document.getElementById('kpiFCR').textContent = `${data.fcr_pct}%`;
+                document.getElementById('kpiAHT').textContent = `${data.avg_aht} s`;
+                document.getElementById('kpiRevenue').textContent = `$${Number(data.total_retained_rev).toLocaleString()}`;
+            } catch (e) {
+                console.error("Error loading KPIs:", e);
+            }
+
+            // 2. Cargar Charts
+            try {
+                const res = await fetch(`/api/charts?channel=${channel}`);
+                const data = await res.json();
+                renderCharts(data);
+            } catch (e) {
+                console.error("Error loading charts:", e);
+            }
+
+            // 3. Cargar Agentes
+            try {
+                const res = await fetch('/api/agents');
+                const agents = await res.json();
+                renderAgents(agents);
+            } catch (e) {
+                console.error("Error loading agents:", e);
+            }
+        }
+
+        function renderCharts(data) {
+            // Chart 1: Hourly
+            const hours = data.hourly.map(h => `${h.hour}:00`);
+            const volumes = data.hourly.map(h => h.volume);
+
+            if (hourlyChart) hourlyChart.destroy();
+            const ctxHourly = document.getElementById('hourlyChart').getContext('2d');
+            hourlyChart = new Chart(ctxHourly, {
+                type: 'line',
+                data: {
+                    labels: hours,
+                    datasets: [{
+                        label: 'Interacciones',
+                        data: volumes,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#60a5fa',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // Chart 2: Channel
+            const channelNames = data.channels.map(c => c.Channel_Name);
+            const channelVols = data.channels.map(c => c.volume);
+
+            if (channelChart) channelChart.destroy();
+            const ctxChannel = document.getElementById('channelChart').getContext('2d');
+            channelChart = new Chart(ctxChannel, {
+                type: 'doughnut',
+                data: {
+                    labels: channelNames,
+                    datasets: [{
+                        data: channelVols,
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // Chart 3: Category Churn Risk
+            const catNames = data.categories.map(c => c.Category_Name);
+            const churnPcts = data.categories.map(c => c.churn_risk_pct);
+
+            if (categoryChart) categoryChart.destroy();
+            const ctxCat = document.getElementById('categoryChart').getContext('2d');
+            categoryChart = new Chart(ctxCat, {
+                type: 'bar',
+                data: {
+                    labels: catNames,
+                    datasets: [{
+                        label: 'Riesgo Churn %',
+                        data: churnPcts,
+                        backgroundColor: ['#ef4444', '#f97316', '#eab308', '#3b82f6', '#10b981'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                        y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { size: 9 } } }
+                    }
+                }
+            });
+        }
+
+        function renderAgents(agents) {
+            const tbody = document.getElementById('agentTableBody');
+            tbody.innerHTML = '';
+            agents.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition-colors";
+                
+                let badge = '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">Estándar</span>';
+                if (a.avg_csat >= 4.4 && a.fcr_rate >= 85) {
+                    badge = '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Champion 🏆</span>';
+                } else if (a.avg_csat < 4.0) {
+                    badge = '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Coaching</span>';
+                }
+
+                tr.innerHTML = `
+                    <td class="py-2.5 font-medium text-slate-200">${a.Agent_Name}</td>
+                    <td class="py-2.5 text-slate-400">${a.Tier_Level}</td>
+                    <td class="py-2.5 text-slate-400">${a.Site_Location}</td>
+                    <td class="py-2.5 text-right font-mono text-slate-300">${a.total_handled.toLocaleString()}</td>
+                    <td class="py-2.5 text-right font-mono text-slate-300">${a.avg_aht}s</td>
+                    <td class="py-2.5 text-right font-mono text-emerald-400">${a.fcr_rate}%</td>
+                    <td class="py-2.5 text-right font-mono text-amber-400 font-bold">${a.avg_csat}</td>
+                    <td class="py-2.5 text-center">${badge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function setQuery(preset) {
+            const input = document.getElementById('sqlInput');
+            if (preset === 1) {
+                input.value = "SELECT cat.Category_Name, COUNT(*) AS Total, ROUND(AVG(f.Churn_Risk_Prob)*100, 1) AS Churn_Risk_Pct, ROUND(AVG(f.CSAT_Score), 2) AS Avg_CSAT FROM Fact_Interactions f JOIN Dim_Incident_Categories cat ON f.Category_Key = cat.Category_Key GROUP BY cat.Category_Name ORDER BY Churn_Risk_Pct DESC;";
+            } else if (preset === 2) {
+                input.value = "SELECT a.Agent_Name, a.Tier_Level, COUNT(*) AS Handled, ROUND(AVG(f.Handling_Time_Seconds), 0) AS AHT, ROUND(AVG(f.CSAT_Score), 2) AS CSAT, SUM(f.Retained_Revenue_USD) AS Value_Protected FROM Fact_Interactions f JOIN Dim_Agents a ON f.Agent_Key = a.Agent_Key GROUP BY a.Agent_Name, a.Tier_Level ORDER BY CSAT DESC;";
+            } else if (preset === 3) {
+                input.value = "SELECT c.Channel_Name, COUNT(*) AS Contact_Volume, ROUND(SUM(f.Operational_Cost_USD), 2) AS Total_Cost_USD, ROUND(SUM(f.Retained_Revenue_USD), 2) AS Retained_Revenue_USD, ROUND(SUM(f.Retained_Revenue_USD) - SUM(f.Operational_Cost_USD), 2) AS Net_Margin_USD FROM Fact_Interactions f JOIN Dim_Channels c ON f.Channel_Key = c.Channel_Key GROUP BY c.Channel_Name ORDER BY Net_Margin_USD DESC;";
+            }
+            runQuery();
+        }
+
+        async function runQuery() {
+            const query = document.getElementById('sqlInput').value.trim();
+            const container = document.getElementById('queryResultContainer');
+            const status = document.getElementById('queryStatus');
+            const thead = document.getElementById('queryThead');
+            const tbody = document.getElementById('queryTbody');
+
+            container.classList.remove('hidden');
+            status.textContent = "Ejecutando consulta analítica...";
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            try {
+                const res = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                const data = await res.json();
+                if (data.error) {
+                    status.innerHTML = `<span class="text-rose-400 font-semibold">Error: ${data.error}</span>`;
+                    return;
+                }
+
+                status.innerHTML = `<span class="text-emerald-400">✓ Consulta ejecutada con éxito</span> (${data.count} registros devueltos)`;
+                
+                // Headers
+                const htr = document.createElement('tr');
+                data.columns.forEach(col => {
+                    const th = document.createElement('th');
+                    th.className = "pb-2 pr-4 font-semibold";
+                    th.textContent = col;
+                    htr.appendChild(th);
+                });
+                thead.appendChild(htr);
+
+                // Rows
+                data.rows.forEach(row => {
+                    const rtr = document.createElement('tr');
+                    row.forEach(val => {
+                        const td = document.createElement('td');
+                        td.className = "py-1.5 pr-4";
+                        td.textContent = (typeof val === 'number') ? Number(val).toLocaleString() : val;
+                        rtr.appendChild(td);
+                    });
+                    tbody.appendChild(rtr);
+                });
+            } catch (e) {
+                status.innerHTML = `<span class="text-rose-400 font-semibold">Error al conectar con el servidor: ${e.message}</span>`;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadAllData);
+    </script>
+</body>
+</html>

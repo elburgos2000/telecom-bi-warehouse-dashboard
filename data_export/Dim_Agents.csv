@@ -1,0 +1,11 @@
+Agent_Key,Agent_Code,Agent_Name,Tier_Level,Site_Location,Shift_Schedule,Supervisor,Hire_Date,Is_Active
+1,AGT-101,Brayan Burgos,Retention VIP,Bogotá Hub,Morning,Carlos Mendoza,2023-01-15,1
+2,AGT-102,Daniela Morales,L2 Escalations,Bogotá Hub,Morning,Carlos Mendoza,2023-03-10,1
+3,AGT-103,Alejandro Gómez,Tech Specialist,Madrid Operational Center,Afternoon,Elena Navarro,2022-11-01,1
+4,AGT-104,Sofía Rodríguez,L1 Support,Bogotá Hub,Afternoon,Carlos Mendoza,2024-02-01,1
+5,AGT-105,Mateo Valencia,Retention VIP,Madrid Operational Center,Morning,Elena Navarro,2023-05-18,1
+6,AGT-106,Camila Restrepo,L2 Escalations,Bogotá Hub,Night,Javier Silva,2023-08-20,1
+7,AGT-107,Felipe Torres,Tech Specialist,Bogotá Hub,Morning,Carlos Mendoza,2022-09-12,1
+8,AGT-108,Valentina Castro,L1 Support,Madrid Operational Center,Afternoon,Elena Navarro,2024-04-05,1
+9,AGT-109,Sebastián Ortiz,L1 Support,Bogotá Hub,Night,Javier Silva,2024-01-10,1
+10,AGT-110,Mariana Ríos,Retention VIP,Madrid Operational Center,Morning,Elena Navarro,2023-02-28,1

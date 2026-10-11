@@ -1,0 +1,5 @@
+Channel_Key,Channel_Code,Channel_Name,Target_AHT_Seconds,Target_FCR_Pct,Cost_Per_Minute_USD
+1,CHN-VOICE,Voice Inbound,300,82.5,0.45
+2,CHN-CHAT,Digital Web Chat,240,88.0,0.22
+3,CHN-WAPP,WhatsApp Official,180,91.5,0.15
+4,CHN-ESCAL,Escalations Desk,420,85.0,0.65

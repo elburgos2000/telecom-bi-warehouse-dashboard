@@ -1,0 +1,6 @@
+Category_Key,Category_Code,Category_Name,Severity_Level,Escalation_Department
+1,CAT-BILL,Facturación & Cobranzas,Medium,Finance Operations
+2,CAT-TECH,Soporte Técnico Fibra / WiFi,High,Network NOC
+3,CAT-PORT,Portabilidad & Activación,Medium,Provisioning
+4,CAT-ROAM,Roaming Internacional,Low,Carrier Services
+5,CAT-CHRN,Retención / Solicitud de Baja,Critical,Retention VIP Desk

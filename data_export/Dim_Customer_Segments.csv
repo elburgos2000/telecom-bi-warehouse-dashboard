@@ -1,0 +1,5 @@
+Segment_Key,Segment_Code,Segment_Name,Priority_Score,Average_ARPU_USD
+1,SEG-PRE,Prepago Standard,1,9.5
+2,SEG-POST,Postpago Ilimitado 5G,3,28.0
+3,SEG-FIBRA,Fibra Óptica 1Gbps + TV,4,45.0
+4,SEG-VIP,VIP Platinum Corporate,5,120.0
