@@ -5,7 +5,7 @@ import json
 import urllib.parse
 import os
 
-PORT = 8085
+PORT = int(os.environ.get("PORT", 8085))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "telecom_bi.db")
 
